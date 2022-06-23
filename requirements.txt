@@ -1,3 +1,6 @@
+pytest
+tox
+sphinx
 numpy
 pandas
 matplotlib
