@@ -1,4 +1,5 @@
 import os
+import dotenv
 
 
 class Config:
@@ -11,25 +12,7 @@ class Config:
         return cls.instance
 
     def __init__(self):
-        # GEI/GSI/CBF
-        self.indices_stat_start_year = 2009  # type:int # 2009
-        self.indices_stat_end_year = 2022  # type:int
-        self.indices_reset_start_year = 2022  # type:int # 2009
-        self.indices_reset_end_year = 2022  # type:int
-        self.indices_reset_table = False  # type:bool
-        self.indices_drop_row = True  # type:bool
-        # WPEP
-        self.model_use_cache = True  # type:bool
-        self.model_dir = f"E:{os.sep}models{os.sep}"  # type: str
-        self.model_name_wp = f"{self.model_dir}model_win_prob.mdl"  # type: str
-        self.model_name_ep = f"{self.model_dir}model_exp_pts.mdl"  # type: str
-        self.model_start = 2009  # type: int
-        self.model_end = 2021  # type: int
-        self.model_seed = 12345  # type: int
-        self.model_reset_start_year = 2022  # type: int # 2009
-        self.model_reset_end_year = 2022  # type: int
-        if not os.path.exists(self.model_dir):
-            os.mkdir(self.model_dir)
+        dotenv.load_dotenv()
 
         # Behaviour
         self.curr_year = 2022  # type: int
@@ -52,11 +35,11 @@ class Config:
 
         # CFLDB CONFIG
         self.database = "postgres"  # type: str
-        self.user = "admin"  # type: str
-        self.password = "password"  # type: str
-        self.host = "postgressql"  # type: str
-        self.port = 5432  # type: int
-        self.db_name = "cfldb"  # type: str
+        self.user = os.getenv("POSTGRES_USER")  # type: str
+        self.password = os.getenv("POSTGRES_PASSWORD")  # type: str
+        self.host = os.getenv("POSTGRES_HOST")  # type: str
+        self.port = os.getenv("POSTGRES_PORT")  # type: int
+        self.db_name = os.getenv("POSTGRES_DB")  # type: str
         self.min_pool_size = 1  # type: int
         self.max_pool_size = 12  # type: int
 
@@ -71,7 +54,7 @@ class Config:
         self.standings_start_year = 1996  # type: int
         self.games_start_year = 2004  # type: int
         self.transactions_start_year = 2004  # type: int
-        self.key = "key"  # type: str
+        self.key = os.getenv("CFL_API_KEY")  # type: str
         self.request_params = {"key": self.key}  # type:  dict
         self.base_url_v10 = "http://api.cfl.ca/v1/"  # type: str
         self.base_url_v11 = "http://api.cfl.ca/v1.1/"  # type: str
