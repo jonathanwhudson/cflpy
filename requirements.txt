@@ -1,5 +1,7 @@
 pytest
 tox
+tox-travis
+coveralls
 sphinx
 numpy
 pandas
