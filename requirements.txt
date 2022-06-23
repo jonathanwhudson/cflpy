@@ -8,3 +8,6 @@ pandas
 matplotlib
 seaborn
 scikit-learn
+python-dotenv
+psycopg2
+more_itertools

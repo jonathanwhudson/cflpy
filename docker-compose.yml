@@ -1,0 +1,50 @@
+version: "3.8"
+
+services:
+
+  postgresql:
+    image: postgres:latest
+    environment:
+     POSTGRES_USER: ${POSTGRES_USER}
+     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+     POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - cfldb-data:/var/lib/postgresql/data
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    restart: always
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
+    volumes:
+      - ./pgadmin-data:/var/lib/pgadmin
+    ports:
+      - "8080:80"
+    restart: always
+    depends_on:
+      - postgresql
+
+  cflpy:
+    image: cflpy:latest
+    environment:
+      POSTGRESQL_HOST: ${POSTGRES_HOST}
+      POSTGRESQL_USER: ${POSTGRES_USER}
+      POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRESQL_DB: ${POSTGRES_DB}
+    volumes:
+      - ./:/app
+      - ./json-data:/app/json
+    ports:
+      - ${CFLPY_PORT}:${CFLPY_PORT}
+    depends_on:
+      - postgresql
+    working_dir: /app
+    command: sh -c "python src/cflpy/docker_success.py && python src/cflpy/file.py && python src/cflpy/postgres.py"
+
+volumes:
+  json-data:
+  cfldb-data:
+  pgadmin-data:
