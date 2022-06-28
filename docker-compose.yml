@@ -20,7 +20,7 @@ services:
       - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
       - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
     volumes:
-      - ./pgadmin-data:/var/lib/pgadmin
+      - pgadmin-data:/var/lib/pgadmin
     ports:
       - "8080:80"
     restart: always
@@ -36,13 +36,13 @@ services:
       POSTGRESQL_DB: ${POSTGRES_DB}
     volumes:
       - ./:/app
-      - ./json-data:/app/json
+      - json-data:/app/json
     ports:
       - ${CFLPY_PORT}:${CFLPY_PORT}
     depends_on:
       - postgresql
     working_dir: /app
-    command: sh -c "python src/cflpy/docker_success.py && python src/cflpy/file.py && python src/cflpy/postgres.py"
+    command: sh -c "python src/cflpy/docker_success.py && python src/cflpy/postgres.py"
 
 volumes:
   json-data:
