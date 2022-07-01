@@ -1,3 +1,5 @@
+import os
+
 import pandas as pd
 
 
@@ -32,3 +34,34 @@ def flatten(dataframe: pd.DataFrame, flatten_column: str) -> pd.DataFrame:
     return pd.concat([dataframe.loc[:, dataframe.columns != flatten_column],
                       pd.DataFrame(dataframe[flatten_column].values.tolist())],
                      axis=1)
+
+def unroll_2(dataframe: pd.DataFrame, keep: str, unroll: str) -> pd.DataFrame:
+    """
+    Take a dataframe and for two columns keep both, but unroll the second (take list and make each entry a new row)
+    :param dataframe: The dataframe to work on
+    :param keep: The columns to keep
+    :param unroll: The column to unroll
+    :return: A dataframe keep first column, and unroll second
+    """
+    columns = [keep, unroll]
+    return pd.DataFrame([[a, c] for a, b in dataframe[columns].values for c in b], columns=columns)
+
+def unroll_4(dataframe: pd.DataFrame, keep: list[str], unroll: str) -> pd.DataFrame:
+    """
+    Take a dataframe and for 4 columns keep 3, but unroll the fourth (take list and make each entry a new row)
+    :param dataframe: The dataframe to work on
+    :param keep: The columns to keep
+    :param unroll: The column to unroll
+    :return: A dataframe keep first three columns, and unroll fourth
+    """
+    columns = keep + [unroll]
+    return pd.DataFrame([[a, b, c, e] for a, b, c, d in dataframe[columns].values for e in d], columns=columns)
+
+def mkdir(path_dir: os.path) -> None:
+    """
+    Make a directory if it does not exist
+    :param path_dir: The directory to make
+    :return: The file system is changed so the directory now exists
+    """
+    if not os.path.exists(path_dir):
+        os.mkdir(path_dir)

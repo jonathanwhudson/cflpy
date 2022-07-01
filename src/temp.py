@@ -1,148 +1,11 @@
-import datetime
-import pickle
-import time
 
-import backoff
 import numpy as np
-from ratelimit import limits, RateLimitException
-from backoff import on_exception
-from urllib.parse import urljoin
 
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.model_selection import train_test_split
 
-import json
-import os
-import pathlib
-import requests
 import sqlite3
 import pandas as pd
-
-from handle_game_advanced import dataframe_playbyplay, dataframe_roster, dataframe_reviews, dataframe_penalties
-from handle_boxscore import dataframe_boxscore
-from handle_game_basic import dataframe_games
-
-MINUTE = 60
-API_MAX_CALLS_PER_MINUTE = 30
-API_KEY = "vrGdfJ8jdsWHN27QhqtlfVSIFtrhc7NI"
-YEAR_START_GAMES = 1958
-YEAR_END_GAMES = datetime.datetime.now().date().year
-YEAR_CURRENT = datetime.datetime.now().date().year
-YEAR_START_ADV = 2004
-YEAR_END_ADV = datetime.datetime.now().date().year
-URL_CFL = "http://api.cfl.ca/"
-URL_V1 = urljoin(URL_CFL, "v1/")
-URL_v11 = urljoin(URL_CFL, "v1.1/")
-URL_GAMES = urljoin(URL_V1, "games/")
-DIR_BASE = pathlib.Path("json")
-DIR_GAMES = DIR_BASE.joinpath("games")
-
-history = None
-
-
-def mkdir(dir_path: os.path) -> None:
-    if not os.path.exists(dir_path):
-        os.mkdir(dir_path)
-
-
-def download_games_basic(reset=False) -> None:
-    mkdir(DIR_BASE)
-    mkdir(DIR_GAMES)
-    for year in range(YEAR_START_GAMES, YEAR_END_GAMES + 1, 1):
-        download_games_basic_year(year, reset)
-
-
-def download_games_basic_year(year: int, reset=False) -> None:
-    year = str(year)
-    url_year = urljoin(URL_GAMES, year)
-    dir_basic = DIR_GAMES.joinpath("basic")
-    mkdir(dir_basic)
-    filename_year = dir_basic.joinpath(f"{year}.json")
-    params = {"key": API_KEY}
-    if reset and os.path.exists(filename_year):
-        os.remove(filename_year)
-    if not os.path.exists(filename_year):
-        download(url_year, filename_year, params)
-    else:
-        if check_errors(filename_year):
-            os.remove(filename_year)
-            download(url_year, filename_year, params)
-
-
-def backoff_handler(details):
-    url = details['args'][0]
-    key = details['args'][1]['key']
-    include = details['args'][1]['include']
-    wait = details['wait']
-    tries = details['tries']
-    print(f"Backing off:{url}?key={key},include={include} {wait:3.1f}s after {tries}.")
-
-
-@on_exception(backoff.constant, RateLimitException, max_tries=5, on_backoff=backoff_handler, jitter=None, interval=15)
-@limits(calls=API_MAX_CALLS_PER_MINUTE, period=MINUTE)
-def download_limited(url: str, params: dict):
-    return requests.get(url, params=params)
-
-
-def download(url: str, filename: os.path, params: dict) -> None:
-    global history
-    if history is None:
-        if os.path.exists("download_history.pkl"):
-            with open('download_history.pkl', 'rb') as file:
-                history = pickle.load(file)
-        else:
-            history = []
-    full_url = f"{url}?"
-    for key, value in params.items():
-        full_url += f"{key}={value},"
-    print(f"Downloading:{full_url}")
-    while True:
-        while len(history) >= API_MAX_CALLS_PER_MINUTE:
-            while history and (history[-1] - datetime.datetime.now()).seconds > MINUTE:
-                history.pop()
-            if len(history) >= API_MAX_CALLS_PER_MINUTE:
-                time.sleep(1)
-        history.insert(0, datetime.datetime.now())
-        with open('download_history.pkl', 'wb') as file:
-            pickle.dump(history, file)
-        response = download_limited(url, params)
-        if response.status_code == requests.codes.ok:
-            with open(filename, "w") as file:
-                if response.text:
-                    file.write(response.text)
-                    return
-        if response.status_code == 429:
-            print(f"Too many requests (429) sleep {MINUTE}s and retry!")
-            time.sleep(MINUTE)
-        else:
-            print(f"Other failure code ({response.status_code}) sleep {MINUTE}s and retry!")
-            time.sleep(MINUTE)
-
-
-def check_errors(filename: os.path) -> bool:
-    with open(filename) as file:
-        text = file.read()
-    if not text:
-        return True
-    json_string = json.loads(text)
-    errors = json_string['errors']
-    if errors:
-        return True
-    return False
-
-
-def load_games_basic(start, end) -> list[dict]:
-    games = []
-    for year in range(start, end + 1, 1):
-        games += load_games_basic_year(year)
-    return games
-
-
-def load_games_basic_year(year: int) -> dict:
-    dir_basic = DIR_GAMES.joinpath("basic")
-    filename_year = dir_basic.joinpath(f"{year}.json")
-    with open(filename_year) as file:
-        return json.loads(file.read())['data']
 
 
 def store_dataframe(df: pd.DataFrame, table_name: str, if_exists) -> None:
@@ -158,66 +21,14 @@ def get_dataframe(table_name: str) -> pd.DataFrame:
     return pd.DataFrame(sql_query)
 
 
-def download_games_advanced(games_df: pd.DataFrame, start, end, reset=False) -> None:
-    mkdir(DIR_BASE)
-    mkdir(DIR_GAMES)
-    for year in range(start, end + 1, 1):
-        download_games_advanced_year(games_df, year, reset)
 
 
-def download_games_advanced_year(games_df: pd.DataFrame, year: int, reset=False) -> None:
-    game_ids = games_df.loc[games_df['year'] == year]['game_id'].values
-    for game_id in game_ids:
-        download_game_advanced(year, game_id, reset)
 
-
-def download_game_advanced(year, game_id, reset=False):
-    year = str(year)
-    dir_advanced = DIR_GAMES.joinpath("advanced")
-    mkdir(dir_advanced)
-    dir_year = dir_advanced.joinpath(year)
-    mkdir(dir_year)
-    url_year = urljoin(URL_GAMES, year + "/")
-    url_game = urljoin(url_year, f"game/{game_id}/")
-    filename_game = dir_year.joinpath(f"{game_id}.json")
-    params = {"key": API_KEY, "include": "boxscore,play_by_play,rosters,penalties,play_reviews"}
-    if reset and os.path.exists(filename_game):
-        os.remove(filename_game)
-    if not os.path.exists(filename_game):
-        download(url_game, filename_game, params)
-    else:
-        if check_errors(filename_game):
-            os.remove(filename_game)
-            download(url_game, filename_game, params)
-
-
-def load_games_advanced(games_df: pd.DataFrame) -> list[dict]:
-    games = []
-    for year in range(YEAR_START_ADV, YEAR_END_ADV + 1, 1):
-        games += load_games_advanced_year(games_df, year)
-    return games
-
-
-def load_games_advanced_year(games_df: pd.DataFrame, year: int) -> list[dict]:
-    games = []
-    game_ids = games_df.loc[games_df['year'] == year]['game_id'].values
-    for game_id in game_ids:
-        games += load_game_advanced(year, game_id)
-    return games
-
-
-def load_game_advanced(year: int, game_id: int) -> dict:
-    year = str(year)
-    dir_advanced = DIR_GAMES.joinpath("advanced")
-    dir_year = dir_advanced.joinpath(year)
-    filename_game = dir_year.joinpath(f"{game_id}.json")
-    with open(filename_game) as file:
-        return json.loads(file.read())['data']
-
-
-def setup() -> None:
+def main() -> None:
     download_games_basic(reset=False)
     games = load_games_basic(YEAR_START_GAMES, YEAR_END_GAMES)
+    print(games)
+    return
     games_df = dataframe_games(games)
     download_games_advanced(games_df, YEAR_START_ADV, YEAR_END_ADV, reset=False)
     games_adv = load_games_advanced(games_df)
@@ -258,8 +69,7 @@ def remove_rows_game_id(table, game_ids):
     connection.close()
 
 
-def main() -> None:
-    #setup()
+def current() -> None:
     games_update_df = games_needing_update()
     print(games_update_df['game_id'])
     # download_games_advanced_year(games_update_df, YEAR_CURRENT, reset=True)
