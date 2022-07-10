@@ -168,7 +168,8 @@ PLAYER_COLUMNS['field_goals'] = {'game_id': 'int', 'abbreviation': 'string', 'te
 PLAYER_COLUMNS['field_goal_returns'] = {'game_id': 'int', 'abbreviation': 'string', 'team_id': 'int',
                                         'field_goal_returns': 'Int64',
                                         'field_goal_returns_yards': 'Int64', 'field_goal_returns_touchdowns': 'Int64',
-                                        'field_goal_returns_long': 'Int64', 'field_goal_returns_touchdowns_long': 'Int64',
+                                        'field_goal_returns_long': 'Int64',
+                                        'field_goal_returns_touchdowns_long': 'Int64',
                                         'cfl_central_id': 'Int64', 'first_name': 'string', 'middle_name': 'string',
                                         'last_name': 'string',
                                         'birth_date': 'string'}

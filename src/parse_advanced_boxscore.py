@@ -6,6 +6,7 @@ import pandas as pd
 import column_dtypes
 import helper
 
+
 def parse_boxscore(dataframe: pd.DataFrame) -> dict[str:dict[str:pd.DataFrame]]:
     result = {}
     teams = pd.concat([pd.DataFrame(dataframe['game_id']), pd.DataFrame(dataframe['boxscore'].values.tolist())], axis=1)
@@ -21,7 +22,7 @@ def parse_boxscore(dataframe: pd.DataFrame) -> dict[str:dict[str:pd.DataFrame]]:
 
     result['team'] = team_boxscore(box_score)
     for column in ['offence', 'turnovers', 'passing', 'rushing', 'receiving', 'punts', 'punt_returns', 'kick_returns',
-         'field_goals', 'field_goal_returns', 'kicking', 'converts', 'defence', 'penalties']:
+                   'field_goals', 'field_goal_returns', 'kicking', 'converts', 'defence', 'penalties']:
         if column in box_score:
             box_score.drop(column, axis=1, inplace=True)
     result['players'] = player_boxscore(box_score)
@@ -36,7 +37,7 @@ def team_boxscore(dataframe: pd.DataFrame) -> dict[str:pd.DataFrame]:
         if key in dataframe.columns:
             result[key] = flatten_stat_team(dataframe, key)
         else:
-            result[key] = pd.DataFrame(columns=['game_id', 'abbreviation', 'team_id']+list(column_dtypes.TEAM_COLUMNS[key].keys()))
+            result[key] = pd.DataFrame(columns=list(column_dtypes.TEAM_COLUMNS[key].keys()))
     result['offence'] = team_boxscore_offence(dataframe)
     result['converts'] = team_boxscore_converts(dataframe)
     # Fix a couple unique columns in data
@@ -52,10 +53,10 @@ def player_boxscore(dataframe: pd.DataFrame) -> dict[str:pd.DataFrame]:
     result = {}
     team_boxscore_players = helper.flatten(dataframe, "players")
     for (key, column) in column_dtypes.PLAYER_COLUMNS.items():
-        if key in dataframe.columns:
+        if key in team_boxscore_players.columns:
             result[key] = flatten_player_stat(team_boxscore_players, key)
         else:
-            result[key] = pd.DataFrame(columns=['game_id', 'abbreviation', 'team_id']+list(column_dtypes.PLAYER_COLUMNS[key].keys()))
+            result[key] = pd.DataFrame(columns=list(column_dtypes.PLAYER_COLUMNS[key].keys()))
     # Fix a couple unique columns in data
     result['passing']['pass_completion_percentage'] = result['passing']['pass_completion_percentage'].str.rstrip(
         '%').astype('float') / 100.0
@@ -113,9 +114,10 @@ def flatten_stat_team(dataframe: pd.DataFrame, column: str) -> pd.DataFrame:
 
 
 def flatten_player_stat(dataframe: pd.DataFrame, column: str) -> pd.DataFrame:
-    player_dataframe = helper.unroll_4(dataframe, ['game_id', 'abbreviation', 'team_id'], column)
+    player_dataframe = helper.unroll_4(dataframe, ["game_id", 'abbreviation', 'team_id'], column)
     player_dataframe = helper.flatten(player_dataframe, column)
-    player_dataframe = helper.flatten(player_dataframe, 'player')
+    if not player_dataframe.empty:
+        player_dataframe = helper.flatten(player_dataframe, 'player')
     return player_dataframe
 
 

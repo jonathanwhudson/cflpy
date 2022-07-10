@@ -3,6 +3,7 @@ import pandas as pd
 
 import column_dtypes
 import helper
+import load
 import parse_advanced_boxscore
 
 
@@ -31,14 +32,14 @@ def parse_pbp(dataframe: pd.DataFrame) -> pd.DataFrame:
     # Some play ids are double to enter for info, set this up as new column
     pbp_df['entry'] = 0
     duplicates = pbp_df.loc[pbp_df.duplicated(subset=['play_id'], keep=False)]
-    duplicates.sort_values('play_id')
+    duplicates = duplicates.sort_values(by=['game_id', 'play_sequence', 'play_success_description'])
     entry = 1
-    game_id = None
+    play_id = None
     for index, row in duplicates.iterrows():
-        if game_id is not None:
-            if game_id != row['game_id']:
+        if play_id is not None:
+            if play_id != row['play_id']:
                 entry = 1
-        game_id = row['game_id']
+        play_id = row['play_id']
         pbp_df.at[index, 'entry'] = entry
         entry += 1
     # Fix up rest of data
@@ -63,9 +64,28 @@ def fixup_pbp(pbp_df: pd.DataFrame):
     pbp_df.loc[(pbp_df['play_id'] == 122546), 'play_clock_start'] = '4:28'
     pbp_df.loc[(pbp_df['play_id'] == 122546), 'play_clock_start_in_secs'] = 4 * 60 + 28
     # Same idea as previous but for field position
-    pbp_df.loc[
-        pbp_df['field_position_start'] == "", ['field_position_start', 'field_position_end']] = np.nan
+    pbp_df.loc[(pbp_df['field_position_start'] != "") &
+               (pbp_df['field_position_start'].str.startswith('0')), ['field_position_start']] = "O" + pbp_df[
+                                                                                                           'field_position_start'].str[
+                                                                                                       1:]
+
     pbp_df.loc[pbp_df['field_position_end'] == "", 'field_position_end'] = np.nan
+    pbp_df.loc[pbp_df['field_position_start'] == "55", 'field_position_start'] = "C55"
+    pbp_df.loc[(pbp_df['field_position_start'] != ""), 'field_position_start'] = pbp_df[
+        'field_position_start'].str.replace("-", "")
+    # pbp_df.loc[pbp_df['field_position_start'] == "H-12", 'field_position_start'] = "H12"
+
+    # End still dirty up to 2015 with random team locations missing (Don't necessarily need for ep/wp
+    pbp_df.loc[pbp_df['field_position_end'] == "55", 'field_position_end'] = "C55"
+    pbp_df.loc[(pbp_df['field_position_end'] != "") &
+               (pbp_df['field_position_end'].str.startswith('0')), ['field_position_end']] = "O" + pbp_df[
+                                                                                                       'field_position_end'].str[
+                                                                                                   1:]
+    pbp_df.loc[(pbp_df['field_position_end'] != ""), 'field_position_end'] = pbp_df['field_position_end'].str.replace(
+        "-", "")
+
+    pbp_df.loc[pbp_df['field_position_start'] == "", ['field_position_start', 'field_position_end']] = np.nan
+
     # Fix up one odd down
     pbp_df.loc[pbp_df['down'] == 11, 'down'] = 1
     # Fixup downs which were 0 to nan
@@ -129,6 +149,7 @@ if __name__ == '__main__':
     from load import *
 
     games_df = load_games_basic_parsed(config.YEAR_START_ADV_USEFUL, config.YEAR_END_GAMES)
-    games_adv_df = load_games_advanced(config.YEAR_START_ADV_USEFUL, config.YEAR_END_ADV, games_df)
+    games = load.extract_year_game_id_pairs_active(games_df)
+    games_adv_df = load_games_advanced(config.YEAR_START_ADV_USEFUL, config.YEAR_END_ADV, games)
     result = parse_advanced_games(games_adv_df)
     print("Done")

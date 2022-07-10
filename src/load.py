@@ -104,7 +104,9 @@ def extract_year_game_id_pairs(dataframe: pd.DataFrame):
 
 
 def extract_year_game_id_pairs_active(dataframe: pd.DataFrame):
-    temp = dataframe.loc[((dataframe['event_status_id'] != 4) & (dataframe['event_status_id'] != 9)) & (dataframe['date_start'] < pd.to_datetime(datetime.datetime.utcnow()).tz_localize("UTC").tz_convert("UTC")), ['year', 'game_id']]
+    temp = dataframe.loc[((dataframe['event_status_id'] != 4) & (dataframe['event_status_id'] != 9)) & (
+                dataframe['date_start'] < pd.to_datetime(datetime.datetime.utcnow()).tz_localize("UTC").tz_convert(
+            "UTC")), ['year', 'game_id']]
     return {(year, game_id) for [year, game_id] in temp.values.tolist()}
 
 

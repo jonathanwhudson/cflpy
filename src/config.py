@@ -6,8 +6,8 @@ from urllib.parse import urljoin
 
 API_KEY: str = "vrGdfJ8jdsWHN27QhqtlfVSIFtrhc7NI"
 API_MAX_CALLS_PER_MINUTE: int = 30
-API_HISTORY_DIR: str = pathlib.Path("temp")
-API_HISTORY_FILE: str = API_HISTORY_DIR.joinpath("download_history.pkl")
+API_HISTORY_DIR: os.path = pathlib.Path("temp")
+API_HISTORY_FILE: os.path = API_HISTORY_DIR.joinpath("download_history.pkl")
 
 URL_CFL: str = "https://api.cfl.ca/"
 URL_V1: str = urljoin(URL_CFL, "v1/")
@@ -23,3 +23,6 @@ YEAR_END_GAMES: int = YEAR_CURRENT
 YEAR_START_ADV = 2004
 YEAR_START_ADV_USEFUL = 2009
 YEAR_END_ADV = YEAR_CURRENT
+
+DB_DIR: os.path = pathlib.Path("data")
+DB_FILE: os.path = DB_DIR.joinpath("data.db")

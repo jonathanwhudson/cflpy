@@ -91,16 +91,17 @@ def download_game_advanced(year: int, game_id: int, limit: set[int, int], reset:
     filename_game: os.path = dir_year.joinpath(f"{game_id}.json")
     url_year: str = urllib.parse.urljoin(config.URL_GAMES, str(year) + "/")
     url_game: str = urllib.parse.urljoin(url_year, f"game/{game_id}/")
-    params: dir[str, str] = {"key": config.API_KEY, "include": "boxscore,play_by_play,rosters,penalties,play_reviews"}
+    params: dir = {"key": config.API_KEY, "include": "boxscore,play_by_play,rosters,penalties,play_reviews"}
     if reset and os.path.exists(filename_game):
         os.remove(filename_game)
     if not os.path.exists(filename_game):
         download(url_game, filename_game, params)
         downloaded.add((year, game_id))
-    while check_errors(filename_game):
-        os.remove(filename_game)
-        download(url_game, filename_game, params)
-        downloaded.add((year, game_id))
+    # Slows things down significantly and likely only applies to error in API request which we should not be making
+    # while check_errors(filename_game):
+    #    os.remove(filename_game)
+    #    download(url_game, filename_game, params)
+    #    downloaded.add((year, game_id))
     return downloaded
 
 
