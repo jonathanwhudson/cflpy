@@ -1,19 +1,16 @@
-import time
-
 import config
 import download
-import load
-import store
 import store_advanced
 import store_basic
 import store_drives
 import store_epa
 import store_gei
 
+REDOWNLOAD = False
 
 def main() -> None:
     print("Resetting (re-downloading) basic games for current year")
-    years = download.download_games_basic(config.YEAR_CURRENT, config.YEAR_CURRENT, reset=True)
+    years = download.download_games_basic(config.YEAR_CURRENT, config.YEAR_CURRENT, reset=REDOWNLOAD)
     print(f"Years downloaded {len(years)}")
     print("Resetting (storage) basic games downloaded for current year")
     store_basic.reset_games_current_year()
@@ -22,7 +19,7 @@ def main() -> None:
     print(f"Games in current year {len(games)}")
     print("Resetting (re-downloading) all advanced games for current year")
     print(f"Expect to take at least {len(games) // config.API_MAX_CALLS_PER_MINUTE} minutes")
-    game_ids = download.download_games_advanced(config.YEAR_CURRENT, config.YEAR_CURRENT, games, reset=True)
+    game_ids = download.download_games_advanced(config.YEAR_CURRENT, config.YEAR_CURRENT, games, reset=REDOWNLOAD)
     print(f"Games downloaded {len(game_ids)}")
     print("Resetting (storage) advanced games downloaded for current year")
     store_advanced.reset_advanced_games_current_year()
