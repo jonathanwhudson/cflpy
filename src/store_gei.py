@@ -219,12 +219,12 @@ def main() -> None:
         reset_gei_year(year)
     # Reset all gei for certain game(note that this should be followed by others that require GEI info)
     if False:
-        game_ids = [6226, 6227, 6228]
+        game_ids = [6227, 6228, 6229]
         print(f"Resetting gei for games=<{game_ids}>")
         reset_gei_games(game_ids)
     # Reset all gei for certain game(note that this should be followed by others that require GEI info)
     if False:
-        game_id = 6228
+        game_id = 6229
         print(f"Resetting gei for game=<{game_id}>")
         reset_gei_game(game_id)
 

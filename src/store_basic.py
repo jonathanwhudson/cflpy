@@ -54,7 +54,6 @@ def load_games_basic_year(year: int) -> pd.DataFrame:
         return helper.clean_and_order_columns(games_df, column_dtypes.GAMES_BASIC)
 
 
-
 def removes_games_basic_years_range(start: int, end: int, limit_years: list[int] = None) -> None:
     years = set(range(start, end + 1, 1))
     if not years:
@@ -108,6 +107,7 @@ def reset_games_year(year: int) -> None:
 def reset_games_current_year() -> None:
     reset_games_year(config.YEAR_CURRENT)
 
+
 def main() -> None:
     # Reset all games (note that this should be followed by advanced game info/drives/EPA/GEI and others that require drive info)
     if False:
@@ -125,7 +125,5 @@ def main() -> None:
 
 
 if __name__ == '__main__':
-    #main()
-    temp = extract_year_game_id_pairs_active()
-    print(temp)
+    main()
     print("Done")

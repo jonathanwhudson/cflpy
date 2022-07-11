@@ -340,12 +340,12 @@ def main() -> None:
         reset_drives_year(year)
     # Reset all drives for certain game(note that this should be followed by EPA/GEI and others that require drive info)
     if False:
-        game_ids = [6226, 6227, 6228]
+        game_ids = [6227, 6228, 6229]
         print(f"Resetting drives for games=<{game_ids}>")
         reset_drives_games(game_ids)
     # Reset all drives for certain game(note that this should be followed by EPA/GEI and others that require drive info)
     if False:
-        game_id = 6228
+        game_id = 6229
         print(f"Resetting drives for game=<{game_id}>")
         reset_drives_game(game_id)
 

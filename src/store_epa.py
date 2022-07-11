@@ -285,7 +285,7 @@ def main() -> None:
         reset_epa_year(year)
     # Reset all drives for certain game(note that this should be followed by GEI and others that require EPA info)
     if False:
-        game_ids = [6226, 6227, 6228]
+        game_ids = [6227, 6228, 6229]
         print(f"Resetting EPA for games=<{game_ids}>")
         reset_epa_games(game_ids)
     # Reset all drives for certain game(note that this should be followed by GEI and others that require EPA info)

@@ -147,7 +147,26 @@ def reset_advanced_games_game(game_id: tuple[int, int]) -> None:
     remove_games_advanced_game(game_id)
     store_games_advanced(result, store.IF_EXISTS_APPEND)
 
-def extract_active_games():
+def extract_games():
+    connection = sqlite3.connect(config.DB_FILE)
+    query = f"SELECT DISTINCT(game_id), year FROM games"
+    dataframe = pd.read_sql(query, connection)
+    game_ids = dataframe[['year', 'game_id']].values.tolist()
+    game_ids = [(year, game_id) for [year, game_id] in game_ids]
+    return game_ids
+
+def extract_games_current_year():
+    return extract_games_year(config.YEAR_CURRENT)
+
+def extract_games_year(year):
+    connection = sqlite3.connect(config.DB_FILE)
+    query = f"SELECT DISTINCT(game_id), year FROM games WHERE year = {year}"
+    dataframe = pd.read_sql(query, connection)
+    game_ids = dataframe[['year', 'game_id']].values.tolist()
+    game_ids = [(year, game_id) for [year, game_id] in game_ids]
+    return game_ids
+
+def extract_games_active():
     connection = sqlite3.connect(config.DB_FILE)
     query = f"SELECT DISTINCT(game_id), year FROM games WHERE (games.event_status_id != 4 AND games.event_status_id != 9) and games.date_start < strftime('%Y-%m-%dT%H:%M:%S-%f','now')"
     dataframe = pd.read_sql(query, connection)
@@ -156,7 +175,7 @@ def extract_active_games():
     return game_ids
 
 def reset_advanced_games_active() -> None:
-    reset_advanced_games_games(extract_active_games())
+    reset_advanced_games_games(extract_games_active())
 
 def main() -> None:
     # Reset all advanced games (note that this should be followed by drives/EPA/GEI and others that require drive info)
