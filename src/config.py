@@ -26,3 +26,7 @@ YEAR_END_ADV = YEAR_CURRENT
 
 DB_DIR: os.path = pathlib.Path("data")
 DB_FILE: os.path = DB_DIR.joinpath("data.db")
+
+MD_DIR: os.path = pathlib.Path("data")
+MD_EP_FILE: os.path = MD_DIR.joinpath("ep.mdl")
+MD_WP_FILE: os.path = MD_DIR.joinpath("wp.mdl")

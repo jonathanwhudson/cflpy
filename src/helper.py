@@ -12,15 +12,23 @@ def ensure_column_type(dataframe: pd.DataFrame, column_types: dict[str:str]) -> 
     """
     for column in dataframe.columns:
         if column not in column_types:
-            raise Exception(f"Unexpected column {column} in dataframe!")
+            raise Exception(f"Unexpected column <{column}> in dataframe!")
     for (column, datatype) in column_types.items():
         # If column does not exist then create it
         if column not in dataframe:
             dataframe[column] = None
-            dataframe[column] = dataframe[column].astype(datatype)
+            try:
+                dataframe[column] = dataframe[column].astype(datatype)
+            except ValueError as e:
+                raise ValueError(
+                    f"Cannot set column <{column}> datatype which is currently <{dataframe[column].dtype}> to <{datatype}> due to {e}")
         # Otherwise set type
         else:
-            dataframe[column] = dataframe[column].astype(datatype)
+            try:
+                dataframe[column] = dataframe[column].astype(datatype)
+            except ValueError as e:
+                raise ValueError(
+                    f"Cannot set column <{column}> datatype which is currently <{dataframe[column].dtype}> to <{datatype}> due to {e}")
 
 
 def flatten(dataframe: pd.DataFrame, flatten_column: str) -> pd.DataFrame:
@@ -68,3 +76,14 @@ def mkdir(path_dir: os.path) -> None:
     """
     if not os.path.exists(path_dir):
         os.mkdir(path_dir)
+
+
+def clean_and_order_columns(dataframe: pd.DataFrame, column_datatypes: dict[str, str]) -> pd.DataFrame:
+    """
+    Takes a dataframe and column data types and returns order form of dataframe after ensuring columns exist with right datatype
+    :param dataframe: The dataframe to ensure columns of and reorder
+    :param column_datatypes: The information of what column names should exist with what datatype
+    :return: Cleaned datafarme
+    """
+    ensure_column_type(dataframe, column_datatypes)
+    return dataframe[[name for (name, dtype) in column_datatypes.items()]]

@@ -1,5 +1,4 @@
 import datetime
-from typing import Any
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -19,9 +18,10 @@ cfl_colors["WPG"] = "#003087"
 cfl_colors["MTL"] = "#8C2334"
 cfl_colors["CGY"] = "#C8102E"
 
+GAME_ID = 6229
 
 def main() -> None:
-    plot = create_plot(6229)
+    plot = create_plot(GAME_ID)
     plot.show()
     plot.close()
 

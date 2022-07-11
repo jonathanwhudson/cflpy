@@ -57,7 +57,7 @@ def remove_games_basic_year(year: int):
 
 def remove_games_basic(game_ids: list[int]):
     connection = sqlite3.connect(config.DB_FILE)
-    connection.execute(f'''DELETE FROM games WHERE game_id in {tuple(game_ids)}''')
+    connection.execute(f'''DELETE FROM games WHERE game_id in {str(tuple(game_ids)).replace(",)",")")}''')
     connection.commit()
     connection.close()
 
@@ -106,6 +106,7 @@ def query(query_string: str):
     dataframe = pd.read_sql(query_string, connection)
     connection.close()
     return dataframe
+
 
 
 def main():
