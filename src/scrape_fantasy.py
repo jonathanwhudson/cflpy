@@ -6,7 +6,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.firefox.service import Service
 
-import store
+import store_basic
 
 driveroptions = Options()
 driveroptions.headless = True
@@ -33,5 +33,5 @@ temp = pd.DataFrame(items, columns=["Last", "Pos", "Game", "Time", "Cost"])
 temp[["Last", "First"]] = temp['Last'].str.split(", ", 1, expand=True)
 temp['Cost'] = temp['Cost'].str[1:].astype(int)
 store_df = temp[['Last', 'First', 'Pos', 'Cost']]
-store.store_dataframe(store_df, "fantasy", store.IF_EXISTS_REPLACE)
+store_basic.store_dataframe(store_df, "fantasy", store_basic.IF_EXISTS_REPLACE)
 driver.quit()

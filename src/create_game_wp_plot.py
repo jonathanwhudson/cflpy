@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
-import store
+import store_basic
 
 cfl_colors = {}
 cfl_colors["BC"] = "#FC4C02"
@@ -27,7 +27,7 @@ def main() -> None:
 
 
 def get_plays_to_plot(game_id: int) -> pd.DataFrame:
-    df = store.query(f'''
+    df = store_basic.query(f'''
         SELECT pbp.play_id,pbp.play_summary,drives.points_scored,drives.quarter,epa.team_1_wp,epa.team_2_wp,drives.time_remaining,drives.won,drives.home,pbp.team_id,pbp.play_result_points,pbp.play_result_type_id,pbp.play_success_id,pbp.play_type_id FROM pbp LEFT JOIN epa ON pbp.play_id=epa.play_id AND pbp.entry=epa.entry LEFT JOIN drives ON pbp.play_id=drives.play_id AND pbp.entry=drives.entry WHERE pbp.game_id={game_id} ORDER BY pbp.play_sequence, pbp.entry
     ''')
     prev_tr = None
@@ -244,17 +244,17 @@ def get_home_away_colors(game_id: int) -> (str, str):
 
 
 def get_home_away_teams(game_id: int) -> (int, int):
-    df = store.query(f"SELECT team_1_team_id, team_2_team_id FROM games WHERE game_id={game_id};")
+    df = store_basic.query(f"SELECT team_1_team_id, team_2_team_id FROM games WHERE game_id={game_id};")
     return df['team_2_team_id'].iat[0], df['team_1_team_id'].iat[0]
 
 
 def get_home_away_scores(game_id: int) -> (int, int):
-    df = store.query(f"SELECT team_1_score, team_2_score FROM games WHERE game_id={game_id};")
+    df = store_basic.query(f"SELECT team_1_score, team_2_score FROM games WHERE game_id={game_id};")
     return df['team_2_score'].iat[0], df['team_1_score'].iat[0]
 
 
 def get_team_abbr(game_id: int, team_id: int) -> str:
-    df = store.query(
+    df = store_basic.query(
         f"SELECT team_1_team_id, team_2_team_id, team_1_abbreviation, team_2_abbreviation FROM games WHERE game_id={game_id};")
     if df['team_1_team_id'].iat[0] == team_id:
         return df['team_1_abbreviation'].iat[0]
@@ -263,7 +263,7 @@ def get_team_abbr(game_id: int, team_id: int) -> str:
 
 
 def get_team_full_name(game_id: int, team_id: int) -> str:
-    df = store.query(
+    df = store_basic.query(
         f"SELECT team_1_team_id, team_2_team_id, team_1_nickname, team_2_nickname FROM games WHERE game_id={game_id};")
     if df['team_1_id'].iat[0] == team_id:
         return df['team_1_nickname'].iat[0]
@@ -272,22 +272,22 @@ def get_team_full_name(game_id: int, team_id: int) -> str:
 
 
 def get_venue_name(game_id: int) -> str:
-    df = store.query(f"SELECT venue FROM games WHERE game_id={game_id}")
+    df = store_basic.query(f"SELECT venue FROM games WHERE game_id={game_id}")
     return df['venue'].iat[0]
 
 
 def get_event_type(game_id: int) -> str:
-    df = store.query(f"SELECT event_type FROM games WHERE game_id={game_id}")
+    df = store_basic.query(f"SELECT event_type FROM games WHERE game_id={game_id}")
     return df['event_type'].iat[0]
 
 
 def get_max_quarter(game_id: int) -> int:
-    df = store.query(f"SELECT quarter FROM pbp WHERE game_id={game_id}")
+    df = store_basic.query(f"SELECT quarter FROM pbp WHERE game_id={game_id}")
     return df['quarter'].max()
 
 
 def get_year_week_date(game_id: int) -> (int, int, datetime):
-    df = store.query(f"SELECT year, week, date_start FROM games WHERE game_id={game_id}")
+    df = store_basic.query(f"SELECT year, week, date_start FROM games WHERE game_id={game_id}")
     return df['year'].iat[0], df['week'].iat[0], df['date_start'].iat[0]
 
 
@@ -310,17 +310,17 @@ def get_titles(game_id: int) -> (str, str):
 
 
 def get_gei(game_id: int) -> float:
-    df = store.query(f"SELECT gei,gei_pct FROM gei WHERE game_id={game_id}")
+    df = store_basic.query(f"SELECT gei,gei_pct FROM gei WHERE game_id={game_id}")
     return df['gei'].iat[0], df['gei_pct'].iat[0]
 
 
 def get_gsi(game_id: int) -> float:
-    df = store.query(f"SELECT gsi,gsi_pct FROM gei WHERE game_id={game_id}")
+    df = store_basic.query(f"SELECT gsi,gsi_pct FROM gei WHERE game_id={game_id}")
     return df['gsi'].iat[0], df['gsi_pct'].iat[0]
 
 
 def get_comeback(game_id: int) -> float:
-    df = store.query(f"SELECT cbf,cbf_pct FROM gei WHERE game_id={game_id}")
+    df = store_basic.query(f"SELECT cbf,cbf_pct FROM gei WHERE game_id={game_id}")
     return df['cbf'].iat[0], df['cbf_pct'].iat[0]
 
 

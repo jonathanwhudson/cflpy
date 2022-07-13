@@ -1,11 +1,12 @@
-import store
 
 #def main():
-epa_df = store.query(
+import store_basic
+
+epa_df = store_basic.query(
     f"""SELECT epa.*,pbp.*,games.* FROM epa LEFT JOIN pbp ON pbp.play_id=epa.play_id AND pbp.entry=epa.entry LEFT JOIN games on pbp.game_id=games.game_id WHERE epa.entry in (0,1) AND epa.YEAR=2022 AND games.event_type_id > 0""")
 epa_df.loc[epa_df["team_id"] == epa_df["team_1_team_id"], 'd_team_id'] = epa_df["team_2_abbreviation"]
 epa_df.loc[epa_df["team_id"] == epa_df["team_2_team_id"], 'd_team_id'] = epa_df["team_1_abbreviation"]
-fantasy_df = store.query("SELECT * FROM fantasy")
+fantasy_df = store_basic.query("SELECT * FROM fantasy")
 fantasy_df['temp1'] = fantasy_df['First'].str.lower()
 fantasy_df['temp2'] = fantasy_df['Last'].str.lower()
 fantasy_df['Cost'] = fantasy_df['Cost'].astype(int)

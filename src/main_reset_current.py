@@ -23,9 +23,9 @@ def main() -> None:
     print(f"Games downloaded {len(game_ids)}")
     print("Resetting (storage) advanced games downloaded for current year")
     store_advanced.reset_advanced_games_current_year()
-    store_drives.reset_drives_current_year()
-    store_epa.reset_epa_current_year()
-    store_gei.reset_gei_current_year()
+    store_drives.reset_drives_year_current()
+    store_epa.reset_epa_year_current()
+    store_gei.reset_gei_year_current()
 
 
 if __name__ == '__main__':

@@ -18,3 +18,7 @@ setuptools
 ratelimit
 
 backoff
+
+SQLAlchemy
+discreteMarkovChain
+selenium
